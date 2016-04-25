@@ -2,7 +2,7 @@ var scene,
     camera,
     renderer,
     light,
-    stereoEnabled = false,
+    stereoEnabled = true,
     /* stereoFallbackEnabled has a bug */
     stereoFallbackEnabled = false,
     stereoFallback = false,
@@ -72,14 +72,19 @@ function init() {
         }
     }
 
+      ABSULIT.lucy.init();
+
     /*
         My code
     */
 
     var geometry = new THREE.BoxGeometry( 2, 2, 2 );
     var material = new THREE.MeshLambertMaterial( {color: 0xff0000, wireframe:false} );
+    var cubeScale = 50;
     cube = new THREE.Mesh( geometry, material );
-    cube.position.z = 5;
+
+    cube.scale.set(cubeScale,cubeScale,cubeScale);
+    cube.position.z = 150;
     scene.add( cube );
 
     light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );

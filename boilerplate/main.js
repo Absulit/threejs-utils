@@ -2,7 +2,7 @@ var scene,
     camera,
     renderer,
     light,
-    stereoEnabled = false,
+    stereoEnabled = true,
     /* stereoFallbackEnabled has a bug */
     stereoFallbackEnabled = false,
     stereoFallback = false,
@@ -38,7 +38,7 @@ var toggleStereo = function(){
 }
 
 function init() {
-    if ( (WEBVR.isLatestAvailable() === false) && !stereoFallbackEnabled ) {
+    if ( stereoEnabled && (WEBVR.isLatestAvailable() === false) && !stereoFallbackEnabled ) {
         document.body.appendChild( WEBVR.getMessage() );
     }
 

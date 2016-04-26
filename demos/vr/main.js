@@ -6,7 +6,8 @@ var scene,
     /* stereoFallbackEnabled has a bug */
     stereoFallbackEnabled = false,
     stereoFallback = false,
-    effect,
+    stereoEffect,
+    vrEffect,
     effectCache,
     noSleep;
 
@@ -14,8 +15,8 @@ var scene,
 var resizeViewport = function(){
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    if(stereoEnabled){
-        effect.setSize(window.innerWidth, window.innerHeight);
+    if(stereoEffect){
+        stereoEffect.setSize(window.innerWidth, window.innerHeight);
     }else{
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
@@ -25,20 +26,20 @@ var toggleStereo = function(){
     stereoEnabled = !stereoEnabled;
     if(stereoEnabled){
         if(effectCache){
-            effect = effectCache
+            stereoEffect = effectCache
         }else{
-            effect = new THREE.StereoEffect(renderer);
-            effect.eyeSeparation = 1;
+            stereoEffect = new THREE.StereoEffect(renderer);
+            stereoEffect.eyeSeparation = 1;
             effectCache = effect;
         }
     }else{
-        effect = null;
+        stereoEffect = null;
     }
     resizeViewport();
 }
 
 function init() {
-    if ( (WEBVR.isLatestAvailable() === false) && !stereoFallbackEnabled ) {
+    if ( stereoEnabled && (WEBVR.isLatestAvailable() === false) && !stereoFallbackEnabled ) {
         document.body.appendChild( WEBVR.getMessage() );
     }
 
@@ -56,23 +57,21 @@ function init() {
 
 
     controls = new THREE.VRControls( camera );
-    effect = new THREE.VREffect( renderer );
+    vrEffect = new THREE.VREffect( renderer );
 
     if(stereoEnabled){
         if ( WEBVR.isAvailable() === true ) {
-            document.body.appendChild( WEBVR.getButton( effect ) );
+            document.body.appendChild( WEBVR.getButton( vrEffect ) );
         }else if(stereoFallbackEnabled){
             console.info('Fallback to StereoEffect');
             stereoFallback = true;
 
-            effect = new THREE.StereoEffect(renderer);
-            effect.eyeSeparation = 1;
+            stereoEffect = new THREE.StereoEffect(renderer);
+            stereoEffect.eyeSeparation = 1;
 
             noSleep = new NoSleep();
         }
     }
-
-      ABSULIT.lucy.init();
 
     /*
         My code
@@ -91,9 +90,12 @@ function init() {
 
     scene.add( light );
 
+     ABSULIT.lucy.init();
+
     /*
         - My code ends
     */
+
     window.addEventListener('click',function(){
         noSleep.enable();
         fullscreen();
@@ -120,9 +122,12 @@ function update() {
     */
 
     if(stereoEnabled){
-        effect.render( scene, camera );
-        if(!stereoFallbackEnabled){
+        if(stereoFallbackEnabled){
+            stereoEffect.render( scene, camera );
+        }else{
+            vrEffect.render( scene, camera );
             controls.update();
+
         }
     }else{
         renderer.render(scene, camera);

@@ -16,10 +16,10 @@ ABSULIT.lucy = ABSULIT.lucy || (function () {
     object.init = function (onComplete) {
         var mtlloader = new THREE.MTLLoader();
         var loader = new THREE.OBJLoader();
-        mtlloader.load( 'lucy_10000.obj.mtl', function( materials ) {
+        mtlloader.load( 'models/lucy_10000.obj.mtl', function( materials ) {
             materials.preload();
             //loader.setMaterials(materials);
-            loader.load('lucy_10000.obj', function (o) {
+            loader.load('models/lucy_10000.obj', function (o) {
                 object.model = o;
 
                 o.scale.set(scale,scale,scale);

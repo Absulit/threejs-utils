@@ -51,12 +51,13 @@ function init() {
 
     scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .1);
     camera.position.set(0, 0, -6);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 
     controls = new THREE.VRControls( camera );
+    controls.standing = true;
     vrEffect = new THREE.VREffect( renderer );
 
     if(stereoEnabled){
@@ -73,15 +74,35 @@ function init() {
         }
     }
 
+
+    var size = 10;
+    var step = 1;
+
+    var gridHelper = new THREE.GridHelper( size, step );
+    scene.add( gridHelper );
+
     /*
         My code
     */
 
-    var geometry = new THREE.BoxGeometry( 2, 2, 2 );
+    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
     var material = new THREE.MeshLambertMaterial( {color: 0xff0000, wireframe:false} );
-    var cubeScale = 50;
-    cube = new THREE.Mesh( geometry, material );
+    var cubeScale = .1;
 
+    var rows=10,columns=10,
+        r=0,c=0;
+
+    for(r=-rows/2; r<rows;r++){
+        for(c=-columns/2; c<columns;c++){
+            cube = new THREE.Mesh( geometry, material );
+            cube.position.set(c,3,r);
+            cube.scale.set(cubeScale,cubeScale,cubeScale);
+            scene.add(cube);
+        }
+    }
+
+    cubeScale = 100;
+    cube = new THREE.Mesh( geometry, material );
     cube.scale.set(cubeScale,cubeScale,cubeScale);
     cube.position.z = 150;
     scene.add( cube );
@@ -90,7 +111,7 @@ function init() {
 
     scene.add( light );
 
-     ABSULIT.lucy.init();
+    ABSULIT.lucy.init();
 
     /*
         - My code ends

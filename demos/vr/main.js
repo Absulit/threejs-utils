@@ -52,8 +52,8 @@ function init() {
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .1);
-    camera.position.set(0, 0, -6);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    camera.position.set(0, 2, -1);
+    camera.lookAt(new THREE.Vector3(0, 1.6, 0));
 
 
     controls = new THREE.VRControls( camera );
@@ -84,6 +84,8 @@ function init() {
     /*
         My code
     */
+
+    renderer.setClearColor(0xFFFFFF);
 
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
     var material = new THREE.MeshLambertMaterial( {color: 0xff0000, wireframe:false} );

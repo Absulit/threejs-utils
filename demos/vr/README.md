@@ -16,7 +16,7 @@ and change this flag (you can use Find in Page)
 
 
 
-![alt text](webvr boilerplate.png "WebVR Demo")
+![alt text](webvr boilerplate 2.png "WebVR Demo")
 
 ![alt text](webvr boilerplate.gif "WebVR Demo")
 

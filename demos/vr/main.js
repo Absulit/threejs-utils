@@ -2,6 +2,7 @@ var scene,
     camera,
     renderer,
     light,
+    directionalLight,
     stereoEnabled = true,
     /* stereoFallbackEnabled has a bug */
     stereoFallbackEnabled = false,
@@ -109,9 +110,14 @@ function init() {
     cube.position.z = 150;
     scene.add( cube );
 
-    light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+    light = new THREE.HemisphereLight( 0xffffbb, 0x080820, .5 );
 
     scene.add( light );
+
+    directionalLight = new THREE.DirectionalLight(0x666666, 1);
+    directionalLight.position.set(20,20,0)
+    directionalLight.castShadow = true;
+    scene.add( directionalLight );
 
     ABSULIT.lucy.init();
 

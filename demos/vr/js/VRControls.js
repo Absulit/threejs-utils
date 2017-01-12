@@ -5,171 +5,191 @@
 
 THREE.VRControls = function ( object, onError ) {
 
-	var scope = this;
+    var scope = this;
 
-	var vrInput;
+    var vrDisplay, vrDisplays;
 
-	var standingMatrix = new THREE.Matrix4();
+    var standingMatrix = new THREE.Matrix4();
 
-	function gotVRDevices( devices ) {
+    function gotVRDisplays( displays ) {
 
-		for ( var i = 0; i < devices.length; i ++ ) {
+        vrDisplays = displays;
 
-			if ( ( 'VRDisplay' in window && devices[ i ] instanceof VRDisplay ) ||
-				 ( 'PositionSensorVRDevice' in window && devices[ i ] instanceof PositionSensorVRDevice ) ) {
+        for ( var i = 0; i < displays.length; i ++ ) {
 
-				vrInput = devices[ i ];
-				break;  // We keep the first we encounter
+            if ( ( 'VRDisplay' in window && displays[ i ] instanceof VRDisplay ) ||
+                 ( 'PositionSensorVRDevice' in window && displays[ i ] instanceof PositionSensorVRDevice ) ) {
 
-			}
+                vrDisplay = displays[ i ];
+                break;  // We keep the first we encounter
 
-		}
+            }
 
-		if ( !vrInput ) {
+        }
 
-			if ( onError ) onError( 'VR input not available.' );
+        if ( vrDisplay === undefined ) {
 
-		}
+            if ( onError ) onError( 'VR input not available.' );
 
-	}
+        }
 
-	if ( navigator.getVRDisplays ) {
+    }
 
-		navigator.getVRDisplays().then( gotVRDevices );
+    if ( navigator.getVRDisplays ) {
 
-	} else if ( navigator.getVRDevices ) {
+        navigator.getVRDisplays().then( gotVRDisplays );
 
-		// Deprecated API.
-		navigator.getVRDevices().then( gotVRDevices );
+    } else if ( navigator.getVRDevices ) {
 
-	}
+        // Deprecated API.
+        navigator.getVRDevices().then( gotVRDisplays );
 
-	// the Rift SDK returns the position in meters
-	// this scale factor allows the user to define how meters
-	// are converted to scene units.
+    }
 
-	this.scale = 1;
+    // the Rift SDK returns the position in meters
+    // this scale factor allows the user to define how meters
+    // are converted to scene units.
 
-	// If true will use "standing space" coordinate system where y=0 is the
-	// floor and x=0, z=0 is the center of the room.
-	this.standing = false;
+    this.scale = 1;
 
-	// Distance from the users eyes to the floor in meters. Used when
-	// standing=true but the VRDisplay doesn't provide stageParameters.
-	this.userHeight = 1.6;
+    // If true will use "standing space" coordinate system where y=0 is the
+    // floor and x=0, z=0 is the center of the room.
+    this.standing = false;
 
-	this.update = function () {
+    // Distance from the users eyes to the floor in meters. Used when
+    // standing=true but the VRDisplay doesn't provide stageParameters.
+    this.userHeight = 1.6;
 
-		if ( vrInput ) {
+    this.getVRDisplay = function () {
 
-			if ( vrInput.getPose ) {
+        return vrDisplay;
 
-				var pose = vrInput.getPose();
+    };
 
-				if ( pose.orientation !== null ) {
+    this.getVRDisplays = function () {
 
-					object.quaternion.fromArray( pose.orientation );
+        return vrDisplays;
 
-				}
+    };
 
-				if ( pose.position !== null ) {
+    this.getStandingMatrix = function () {
 
-					object.position.fromArray( pose.position );
+        return standingMatrix;
 
-				} else {
+    };
 
-					object.position.set( 0, 0, 0 );
+    this.update = function () {
 
-				}
+        if ( vrDisplay ) {
 
-			} else {
+            if ( vrDisplay.getPose ) {
 
-				// Deprecated API.
-				var state = vrInput.getState();
+                var pose = vrDisplay.getPose();
 
-				if ( state.orientation !== null ) {
+                if ( pose.orientation !== null ) {
 
-					object.quaternion.copy( state.orientation );
+                    object.quaternion.fromArray( pose.orientation );
 
-				}
+                }
 
-				if ( state.position !== null ) {
+                if ( pose.position !== null ) {
 
-					object.position.copy( state.position );
+                    object.position.fromArray( pose.position );
 
-				} else {
+                } else {
 
-					object.position.set( 0, 0, 0 );
+                    object.position.set( 0, 0, 0 );
 
-				}
+                }
 
-			}
+            } else {
 
-			if ( this.standing ) {
+                // Deprecated API.
+                var state = vrDisplay.getState();
 
-				if ( vrInput.stageParameters ) {
+                if ( state.orientation !== null ) {
 
-					object.updateMatrix();
+                    object.quaternion.copy( state.orientation );
 
-					standingMatrix.fromArray(vrInput.stageParameters.sittingToStandingTransform);
-					object.applyMatrix( standingMatrix );
+                }
 
-				} else {
+                if ( state.position !== null ) {
 
-					object.position.setY( object.position.y + this.userHeight );
+                    object.position.copy( state.position );
 
-				}
+                } else {
 
-			}
+                    object.position.set( 0, 0, 0 );
 
-			object.position.multiplyScalar( scope.scale );
+                }
 
-		}
+            }
 
-	};
+            if ( this.standing ) {
 
-	this.resetPose = function () {
+                if ( vrDisplay.stageParameters ) {
 
-		if ( vrInput ) {
+                    object.updateMatrix();
 
-			if ( vrInput.resetPose !== undefined ) {
+                    standingMatrix.fromArray( vrDisplay.stageParameters.sittingToStandingTransform );
+                    object.applyMatrix( standingMatrix );
 
-				vrInput.resetPose();
+                } else {
 
-			} else if ( vrInput.resetSensor !== undefined ) {
+                    object.position.setY( object.position.y + this.userHeight );
 
-				// Deprecated API.
-				vrInput.resetSensor();
+                }
 
-			} else if ( vrInput.zeroSensor !== undefined ) {
+            }
 
-				// Really deprecated API.
-				vrInput.zeroSensor();
+            object.position.multiplyScalar( scope.scale );
 
-			}
+        }
 
-		}
+    };
 
-	};
+    this.resetPose = function () {
 
-	this.resetSensor = function () {
+        if ( vrDisplay ) {
 
-		console.warn( 'THREE.VRControls: .resetSensor() is now .resetPose().' );
-		this.resetPose();
+            if ( vrDisplay.resetPose !== undefined ) {
 
-	};
+                vrDisplay.resetPose();
 
-	this.zeroSensor = function () {
+            } else if ( vrDisplay.resetSensor !== undefined ) {
 
-		console.warn( 'THREE.VRControls: .zeroSensor() is now .resetPose().' );
-		this.resetPose();
+                // Deprecated API.
+                vrDisplay.resetSensor();
 
-	};
+            } else if ( vrDisplay.zeroSensor !== undefined ) {
 
-	this.dispose = function () {
+                // Really deprecated API.
+                vrDisplay.zeroSensor();
 
-		vrInput = null;
+            }
 
-	};
+        }
+
+    };
+
+    this.resetSensor = function () {
+
+        console.warn( 'THREE.VRControls: .resetSensor() is now .resetPose().' );
+        this.resetPose();
+
+    };
+
+    this.zeroSensor = function () {
+
+        console.warn( 'THREE.VRControls: .zeroSensor() is now .resetPose().' );
+        this.resetPose();
+
+    };
+
+    this.dispose = function () {
+
+        vrDisplay = null;
+
+    };
 
 };

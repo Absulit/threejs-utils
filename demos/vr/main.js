@@ -16,9 +16,16 @@ var scene,
 var resizeViewport = function(){
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    if(stereoEffect){
-        stereoEffect.setSize(window.innerWidth, window.innerHeight);
-    }else{
+
+    if(stereoEnabled){
+        if(stereoEffect){
+            stereoEffect.setSize(window.innerWidth, window.innerHeight);
+        }else{
+            vrEffect.setSize(window.innerWidth, window.innerHeight);
+
+        }
+    }
+    else{
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
 }
@@ -57,9 +64,11 @@ function init() {
     camera.lookAt(new THREE.Vector3(0, 1.6, 0));
 
 
-    controls = new THREE.VRControls( camera );
-    controls.standing = true;
-    vrEffect = new THREE.VREffect( renderer );
+    if(THREE.VRControls){
+        controls = new THREE.VRControls( camera );
+        controls.standing = true;
+        vrEffect = new THREE.VREffect( renderer );
+    }
 
     if(stereoEnabled){
         if ( WEBVR.isAvailable() === true ) {
@@ -71,8 +80,8 @@ function init() {
             stereoEffect = new THREE.StereoEffect(renderer);
             stereoEffect.eyeSeparation = 1;
 
-            noSleep = new NoSleep();
         }
+        noSleep = new NoSleep();
     }
 
 
